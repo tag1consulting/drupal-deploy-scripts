@@ -1,0 +1,21 @@
+# This file is sourced from the deploy scripts
+# so that we have a central location for settings
+# such as directories, server grouping, etc.
+
+# GIT_DIR_NAME is the location of the git clone
+# which is used as a base when deploying releases
+GIT_DIR_NAME=site_git
+
+# RELEASE_DIR_NAME is the directory which holds releases
+# (deployments of a particular git tag) for production.
+RELEASE_DIR_NAME=releases
+
+# Files directory lives outside of the git clone
+# so that we can symlink to the same files directory
+# when deploying a new release.
+# This path will be added to the webroot base (e.g. /var/www/<sitename>/)
+FILES_DIR_NAME=files
+
+# WEBROOT_SYMLINK is the symlink file that will point to the current release.
+# This should be the same as the vhost document root in Apache
+WEBROOT_SYMLINK_NAME=current
