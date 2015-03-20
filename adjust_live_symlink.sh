@@ -4,7 +4,7 @@
 # Use with care, this updates the LIVE website symlink.
 
 # Change this if deploy_settings file is in a different location.
-DEPLOY_SETTINGS=/home/jeff/deploy_settings
+DEPLOY_SETTINGS=/usr/local/deploy/deploy_settings
 
 usage() {
   echo "usage: $0 [-d @drush_alias] [-t git tag]"
