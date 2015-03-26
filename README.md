@@ -8,6 +8,9 @@ The ```deploy_settings``` file contains some default settings (mostly directory 
 ## Scripts
 * ```adjust_live_symlink.sh``` is used to update a site's symlink to point to a given release directory. This is generally called after deploying a tag in order to adjust the ```current``` symlink to point to the newly-deployed version of the site.
 * ```db_snapshot.sh``` is used to create an SQL dump of a site's database using ```drush sql-dump --gzip```. The output directory is taken from the ```['shell-aliases']['db-snapshot-dir']``` setting within a site's Drush alias definition.
+* ```drush_cache_clear.sh``` is a wrapper script around ```drush cc all``` for a given Drush alias.
+* ```drush_db_update.sh``` is a wrapper script around ```drush updb``` for a given Drush alias.
+* ```drush_maint_mode.sh``` is a wrapper script to enable or disable Drupal maintenance mode for a given Drush alias.
 * ```site_deploy.sh``` is the main script used to deploy code. It accepts a Drush alias and a git tag (or branch name) as an argument, and will deploy the given git tag to the specified site's webroot. For more information, see the "Deployment" section below.
 
 ## Deployments
