@@ -71,7 +71,7 @@ DRUPAL_SITE_DIR=$(drush $DRUSH_ALIAS sitedir 2>/dev/null)
 
 if [ -z "${DRUPAL_SITE_DIR}" ]
 then
-  DRUPAL_SITE_DIR=sites/deafult
+  DRUPAL_SITE_DIR=sites/default
 fi
 
 HOSTNAME=$(uname -n)

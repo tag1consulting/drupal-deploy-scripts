@@ -13,5 +13,6 @@ $aliases['dev'] = array(
     'basedir' => '!echo /var/www/d8-dev.tag1consulting.com',
     'giturl'  => '!echo git@github.com:tag1consulting/d8-tag1consulting.com.git',
     'db-snapshot-dir'  => '!echo /data/backup/mysql',
+    'site-environment' => '!echo dev',
   ),
 );
