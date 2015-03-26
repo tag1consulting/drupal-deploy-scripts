@@ -71,7 +71,7 @@ DRUPAL_SITE_DIR=$(drush $DRUSH_ALIAS sitedir 2>/dev/null)
 
 if [ -z "${DRUPAL_SITE_DIR}" ]
 then
-  DRUPAL_SITE_DIR=sites/default
+  DRUPAL_SITE_DIR=docroot/sites/default
 fi
 
 HOSTNAME=$(uname -n)
@@ -116,7 +116,7 @@ cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
 ln -s instances/${ENVIRONMENT}/settings.local.php settings.local.php
 
 LINK_SERVICES_YML=$(drush $DRUSH_ALIAS link-services-yml 2>/dev/null)
-if [ ! -z "${LINK_SERVICES_YML}" ]
+if [ "${LINK_SERVICES_YML}" == "true" ]
 then
   echo "Creating symlink for services.yml"
   cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
