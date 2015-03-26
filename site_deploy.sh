@@ -11,18 +11,24 @@
 DEPLOY_SETTINGS=/usr/local/deploy/deploy_settings
 
 usage() {
-  echo "usage: $0 [-d @drush_alias] [-t git tag]"
+  echo "usage: $0 [-d @drush_alias] [-t git tag] [-f]"
   echo "    -d          Specify drush alias (include leading @)"
   echo "    -t          Specify git tag to link to"
+  echo "    -f          Force deploy even if the target release directory already exists."
   echo ""
-  echo "Both arguments are required."
+  echo "-d and -t arguments are required."
   exit 1
 }
 
-while getopts "d:t:" opt; do
+FORCE=0
+
+while getopts "d:ft:" opt; do
   case $opt in
     d)
       DRUSH_ALIAS=$OPTARG
+      ;;
+    f)
+      FORCE=1
       ;;
     t)
       GIT_TAG=$OPTARG
@@ -82,19 +88,34 @@ FILES_DIR=${BASEDIR}/${FILES_DIR_NAME}
 
 echo "Going to deploy $GIT_TAG on $HOSTNAME"
 
+TARGET_DIR=${RELEASE_DIR}/${GIT_TAG}
+
+# In most cases we don't want to overwrite a release dir if it already exists.
+# But on Dev sites where we may deploy a branch name (e.g. "dev"), we may want to replace an old release dir.
+# Only do so if the force (-f) flag was passed.
+if [ -d $TARGET_DIR ] && [ $FORCE != 1 ]
+then
+  echo "Target release directory (${TARGET_DIR}) already exists, won't overwrite without -f flag."
+  exit 1
+fi
+
+# Create git directory if it doesn't exist.
 if [ ! -d ${GIT_DIR} ]
 then
   mkdir ${GIT_DIR}
 fi
 
+# Run git fetch in git directory if a clone already exits, otherwise clone from remote git URL.
 if [ -d ${GIT_DIR}/.git ]
 then
   echo "Found .git directory, looks like a clone already exists."
   cd $GIT_DIR
   echo "Running git fetch --all"
-  /usr/bin/git fetch --all || { echo "Error with git fetch command."; exit 1; }
+  /usr/bin/git fetch --all || { echo "Error with git fetch --all command."; exit 1; }
   echo "Running git fetch --tags"
-  /usr/bin/git fetch --tags || { echo "Error with git fetch command."; exit 1; }
+  /usr/bin/git fetch --tags || { echo "Error with git fetch --tags command."; exit 1; }
+  echo "Updating current clone with git pull"
+  /usr/bin/git pull || { echo "Error with git pull command."; exit 1; }
 else
   echo "Git directory doesn't exist, cloning from remote."
   cd ${GIT_DIR}
@@ -107,12 +128,17 @@ then
   mkdir ${RELEASE_DIR}
 fi
 
+# All symlinks are removed and re-created with each deploy
+# To be sure all links match the current environment.
+
 # Symlink to the files directory
 cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
+rm -f files
 ln -s ${FILES_DIR} files
 
 echo "Creating symlink for settings.local.php."
 cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
+rm -f settings.local.php
 ln -s instances/${ENVIRONMENT}/settings.local.php settings.local.php
 
 LINK_SERVICES_YML=$(drush $DRUSH_ALIAS link-services-yml 2>/dev/null)
@@ -120,6 +146,7 @@ if [ "${LINK_SERVICES_YML}" == "true" ]
 then
   echo "Creating symlink for services.yml"
   cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
+  rm -f services.yml
   ln -s instances/${ENVIRONMENT}/services.yml services.yml
 fi
 
@@ -129,10 +156,10 @@ echo "Checking that target tag exists..."
 # ideally would use --short flag for this, but not supported in our version of git
 # so using cut instead.
 CUR_BRANCH=$(/usr/bin/git symbolic-ref -q HEAD | cut -d / -f 3)
-/usr/bin/git checkout $GIT_TAG
+/usr/bin/git checkout $GIT_TAG 2>/dev/null
 ret=$?
 # Switch back to the old branch (usually master)
-/usr/bin/git checkout ${CUR_BRANCH}
+/usr/bin/git checkout ${CUR_BRANCH} 2>/dev/null
 
 if [ $ret != 0 ]
 then
@@ -140,7 +167,12 @@ then
   exit 1
 fi
 
-TARGET_DIR=${RELEASE_DIR}/${GIT_TAG}
+# Remove target directory if it exists and -f was specified.
+if [ -d $TARGET_DIR ] && [ $FORCE == 1 ]
+then
+  echo "Target release directory exists, but -f was specified. Removing old directory..."
+  rm -fr $TARGET_DIR
+fi
 
 # Copy base git clone to target directory
 cp -a $GIT_DIR $TARGET_DIR
@@ -150,4 +182,4 @@ touch $TARGET_DIR
 cd $TARGET_DIR
 
 echo "Running git checkout $GIT_TAG"
-/usr/bin/git checkout $GIT_TAG || { echo "Error with git checkout command."; exit 1; }
+/usr/bin/git checkout $GIT_TAG 2>/dev/null || { echo "Error with git checkout command."; exit 1; }
