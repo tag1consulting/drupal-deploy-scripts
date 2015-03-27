@@ -6,6 +6,10 @@
 # which is used as a base when deploying releases
 GIT_DIR_NAME=site_git
 
+# DOCROOT_DIR_NAME is the directory name of the web docroot
+# within a git clone.
+DOCROOT_DIR_NAME=docroot
+
 # RELEASE_DIR_NAME is the directory which holds releases
 # (deployments of a particular git tag) for production.
 RELEASE_DIR_NAME=releases
