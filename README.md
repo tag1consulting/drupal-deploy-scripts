@@ -16,6 +16,26 @@ The ```deploy_settings``` file contains some default settings (mostly directory 
 ## Deployments
 In order to not overwrite the code on a currently-running site, the ```site_deploy.sh``` script uses a "git working" directory to clone/update code, and then copies that directory into a "release" directory, ```releases/<tag_name>```. For staging and produciton sites, the deployment is expected to be a git tag since this gives an easy way to roll back to a previous release and to know at a glance which version is running in a given environment. For dev sites, the script can instead deploy HEAD of a given branch name. In this case, run ```site_deploy.sh``` with the '-f' flag to force overwriting the target release directory.
 
+A typical Drupal deployment may follow the following steps:
+
+1. Take snapshot of DB (```db_snapshot.sh```).
+2. Enable maintenance mode (```drush_maint_mode.sh```), then cache-clear (```drush_cache_clear.sh```).
+3. Deploy new code (```site_deploy.sh```).
+4. Run DB updates (```drush_db_update.sh```).
+5. Take site out of maintenance mode (```drush_maint_mode.sh```), then cache-clear (```drush_cache_clear.sh```).
+
+Example, deploying the 'develop' branch to the site '@example.dev':
+```
+$ db_snapshot.sh -d @example.dev
+$ sudo -u apache drush_maint_mode.sh -d @example.dev -m 1
+$ sudo -u apache drush_cache_clear.sh -d @example.dev
+$ site_deploy.sh -d @example.dev -t develop -f
+$ adjust_live_symlink.sh -d @example.dev -t develop
+$ sudo -u apache drush_db_update.sh -d @example.dev
+$ sudo -u apache drush_maint_mode.sh -d @example.dev -m 0
+```
+
+
 ## Directory Structure
 The scripts will setup a directory structure within the given base directory (definied in your Drush alias).
 
