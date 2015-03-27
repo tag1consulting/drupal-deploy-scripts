@@ -24,15 +24,15 @@ A typical Drupal deployment may follow the following steps:
 4. Run DB updates (```drush_db_update.sh```).
 5. Take site out of maintenance mode (```drush_maint_mode.sh```), then cache-clear (```drush_cache_clear.sh```).
 
-Example, deploying the 'develop' branch to the site '@example.dev':
+Example, deploying the tag '1.0.1' to the site '@example.stage':
 ```
-$ db_snapshot.sh -d @example.dev
-$ sudo -u apache drush_maint_mode.sh -d @example.dev -m 1
-$ sudo -u apache drush_cache_clear.sh -d @example.dev
-$ site_deploy.sh -d @example.dev -t develop -f
-$ adjust_live_symlink.sh -d @example.dev -t develop
-$ sudo -u apache drush_db_update.sh -d @example.dev
-$ sudo -u apache drush_maint_mode.sh -d @example.dev -m 0
+$ db_snapshot.sh -d @example.stage
+$ sudo -u apache drush_maint_mode.sh -d @example.stage -m 1
+$ sudo -u apache drush_cache_clear.sh -d @example.stage
+$ site_deploy.sh -d @example.stage -t 1.0.1 -f
+$ adjust_live_symlink.sh -d @example.stage -t 1.0.1
+$ sudo -u apache drush_db_update.sh -d @example.stage
+$ sudo -u apache drush_maint_mode.sh -d @example.stage -m 0
 ```
 
 
