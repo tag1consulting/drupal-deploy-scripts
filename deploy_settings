@@ -23,3 +23,6 @@ FILES_DIR_NAME=files
 # WEBROOT_SYMLINK is the symlink file that will point to the current release.
 # This should be the same as the vhost document root in Apache
 WEBROOT_SYMLINK_NAME=current
+
+# DRUSH_CMD is your local path to the drush binary.
+DRUSH_CMD=/usr/local/bin/drush

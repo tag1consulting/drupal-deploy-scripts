@@ -1,6 +1,9 @@
 #!/bin/bash
-
+#
 # Take a snapshot of a Drupal database for a given Drush alias.
+
+# Change this if deploy_settings file is in a different location.
+DEPLOY_SETTINGS=/usr/local/deploy/deploy_settings
 
 usage() {
   echo "usage: $0 [-d @drush_alias]"
@@ -25,7 +28,16 @@ then
   usage
 fi
 
-DB_SNAPSHOT_DIR=$(drush $DRUSH_ALIAS db-snapshot-dir 2>/dev/null)
+# Get shared settings for deploy scripts.
+if [ -f  $DEPLOY_SETTINGS ]
+then
+  . $DEPLOY_SETTINGS
+else
+  echo "Deploy settings file (${DEPLOY_SETTINGS}) is missing."
+  exit 1
+fi
+
+DB_SNAPSHOT_DIR=$($DRUSH_CMD $DRUSH_ALIAS db-snapshot-dir 2>/dev/null)
 
 if [ -z "${DB_SNAPSHOT_DIR}" ] || [ ! -d $DB_SNAPSHOT_DIR ]
 then
@@ -36,5 +48,5 @@ fi
 DATE=$(date +"%Y%m%d%H%M")
 OUTFILE=${DB_SNAPSHOT_DIR}/${DRUSH_ALIAS}-${DATE}.sql.gz
 
-/usr/bin/drush @${DRUSH_ALIAS} sql-dump --gzip > ${OUTFILE}
+$DRUSH_CMD $DRUSH_ALIAS sql-dump --gzip > ${OUTFILE}
 ls -lh ${OUTFILE}

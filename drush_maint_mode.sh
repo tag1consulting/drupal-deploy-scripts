@@ -4,6 +4,9 @@
 # This is a simple wrapper script that can be added to sudo config
 # so that the deploy user can run drush as the Apache/web user.
 
+# Change this if deploy_settings file is in a different location.
+DEPLOY_SETTINGS=/usr/local/deploy/deploy_settings
+
 usage() {
   echo "usage: $0 [-d @drush_alias] [-m [0|1]]"
   echo "    -d          Specify drush alias (include leading @)"
@@ -37,9 +40,18 @@ then
   usage
 fi
 
+# Get shared settings for deploy scripts.
+if [ -f  $DEPLOY_SETTINGS ]
+then
+  . $DEPLOY_SETTINGS
+else
+  echo "Deploy settings file (${DEPLOY_SETTINGS}) is missing."
+  exit 1
+fi
+
 HOSTNAME=$(uname -n)
 
 echo "On host ${HOSTNAME}"
 echo "Going to set maintenance_mode: $MODE on site: $DRUSH_ALIAS"
 
-/usr/bin/drush $DRUSH_ALIAS vset maintenance_mode $MODE || { echo "Drush command exited with an error."; exit 1; }
+$DRUSH_CMD $DRUSH_ALIAS vset maintenance_mode $MODE || { echo "Drush command exited with an error."; exit 1; }

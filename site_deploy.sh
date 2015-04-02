@@ -51,21 +51,21 @@ else
   exit 1
 fi
 
-BASEDIR=$(drush $DRUSH_ALIAS basedir 2>/dev/null)
+BASEDIR=$($DRUSH_CMD $DRUSH_ALIAS basedir 2>/dev/null)
 if [ -z "${BASEDIR}" ] || [ ! -d $BASEDIR ]
 then
   echo "Base directory (${BASEDIR}) doesn't exist. Ensure ['shell-aliases']['basedir'] is set for this drush alias."
   exit 1
 fi
 
-GIT_REPO_URL=$(drush $DRUSH_ALIAS giturl 2>/dev/null)
+GIT_REPO_URL=$($DRUSH_CMD $DRUSH_ALIAS giturl 2>/dev/null)
 if [ -z "${GIT_REPO_URL}" ]
 then
   echo "Git repo URL is empty. Ensure ['shell-aliases']['giturl'] is set for this drush alias."
   exit 1
 fi
 
-ENVIRONMENT=$(drush $DRUSH_ALIAS site-environment 2>/dev/null)
+ENVIRONMENT=$($DRUSH_CMD $DRUSH_ALIAS site-environment 2>/dev/null)
 if [ -z "${ENVIRONMENT}" ]
 then
   echo "Site environment is empty. Ensure ['shell-aliases']['site-environment'] is set for this drush alias. (e.g. "dev" or "prod")."
@@ -73,7 +73,7 @@ then
 fi
 
 # Get site dir (e.g. "sites/some.host.com") if set, otherwise set to default of "sites/default".
-DRUPAL_SITE_DIR=$(drush $DRUSH_ALIAS sitedir 2>/dev/null)
+DRUPAL_SITE_DIR=$($DRUSH_CMD $DRUSH_ALIAS sitedir 2>/dev/null)
 
 if [ -z "${DRUPAL_SITE_DIR}" ]
 then
@@ -141,7 +141,7 @@ cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
 rm -f settings.local.php
 ln -s instances/${ENVIRONMENT}/settings.local.php settings.local.php
 
-LINK_SERVICES_YML=$(drush $DRUSH_ALIAS link-services-yml 2>/dev/null)
+LINK_SERVICES_YML=$($DRUSH_CMD $DRUSH_ALIAS link-services-yml 2>/dev/null)
 if [ "${LINK_SERVICES_YML}" == "true" ]
 then
   echo "Creating symlink for services.yml"

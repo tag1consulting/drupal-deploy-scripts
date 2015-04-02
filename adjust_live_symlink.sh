@@ -42,7 +42,7 @@ else
   exit 1
 fi
 
-BASEDIR=$(drush $DRUSH_ALIAS basedir 2>/dev/null)
+BASEDIR=$($DRUSH_CMD $DRUSH_ALIAS basedir 2>/dev/null)
 
 if [ -z "${BASEDIR}" ] || [ ! -d $BASEDIR ]
 then

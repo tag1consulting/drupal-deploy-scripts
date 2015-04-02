@@ -5,6 +5,9 @@
 # so that the deploy user can run a cache clear as the Apache/web user.
 # For d8 sites, this will call 'cache-rebuild' if you pass the -r flag.
 
+# Change this if deploy_settings file is in a different location.
+DEPLOY_SETTINGS=/usr/local/deploy/deploy_settings
+
 usage() {
   echo "usage: $0 [-d @drush_alias] [-r]"
   echo "    -d          Specify drush alias (include leading @)"
@@ -35,9 +38,18 @@ then
   usage
 fi
 
+# Get shared settings for deploy scripts.
+if [ -f  $DEPLOY_SETTINGS ]
+then
+  . $DEPLOY_SETTINGS
+else
+  echo "Deploy settings file (${DEPLOY_SETTINGS}) is missing."
+  exit 1
+fi
+
 HOSTNAME=$(uname -n)
 
 echo "On host ${HOSTNAME}"
 echo "Going to clear all caches on site: $DRUSH_ALIAS"
 
-/usr/bin/drush $DRUSH_ALIAS $COMMAND || { echo "Drush command exited with an error."; exit 1; }
+$DRUSH_CMD $DRUSH_ALIAS $COMMAND || { echo "Drush command exited with an error."; exit 1; }
