@@ -11,18 +11,25 @@ usage() {
   echo "usage: $0 [-d @drush_alias] [-m [0|1]]"
   echo "    -d          Specify drush alias (include leading @)"
   echo "    -m          Mode to set: 0 disables maintenance mode, 1 enables maintenance mode."
+  echo "    -8          For Drupal 8 sites: calls 'sset' instead of 'vset'"
   echo ""
-  echo "Both arguments are required."
+  echo "-d and -m arguments are required."
   exit 1
 }
 
-while getopts "d:m:" opt; do
+# Default for Drupal <8, "vset", this is overridden with the -8 flag.
+COMMAND='vset maintenance_mode'
+
+while getopts "d:m:8" opt; do
   case $opt in
     d)
       DRUSH_ALIAS=$OPTARG
       ;;
     m)
       MODE=$OPTARG
+      ;;
+    8)
+      COMMAND='sset system.maintenance_mode'
       ;;
     *)
       usage
@@ -54,4 +61,4 @@ HOSTNAME=$(uname -n)
 echo "On host ${HOSTNAME}"
 echo "Going to set maintenance_mode: $MODE on site: $DRUSH_ALIAS"
 
-$DRUSH_CMD $DRUSH_ALIAS vset maintenance_mode $MODE || { echo "Drush command exited with an error."; exit 1; }
+$DRUSH_CMD $DRUSH_ALIAS $COMMAND $MODE || { echo "Drush command exited with an error."; exit 1; }
