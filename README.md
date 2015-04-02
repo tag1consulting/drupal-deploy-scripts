@@ -29,7 +29,7 @@ Example, deploying the tag '1.0.1' to the site '@example.stage':
 $ db_snapshot.sh -d @example.stage
 $ sudo -u apache drush_maint_mode.sh -d @example.stage -m 1
 $ sudo -u apache drush_cache_clear.sh -d @example.stage
-$ site_deploy.sh -d @example.stage -t 1.0.1 -f
+$ site_deploy.sh -d @example.stage -t 1.0.1
 $ adjust_live_symlink.sh -d @example.stage -t 1.0.1
 $ sudo -u apache drush_db_update.sh -d @example.stage
 $ sudo -u apache drush_maint_mode.sh -d @example.stage -m 0
