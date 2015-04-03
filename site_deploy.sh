@@ -131,6 +131,13 @@ fi
 # All symlinks are removed and re-created with each deploy
 # To be sure all links match the current environment.
 
+# We assume 'files' is a symlink, error out if not to prevent erasing site files.
+if [ -f ${GIT_DIR}/${DRUPAL_SITE_DIR}/files ] && [ ! -L ${GIT_DIR}/${DRUPAL_SITE_DIR}/files ]
+then
+  echo "${GIT_DIR}/${DRUPAL_SITE_DIR}/files exists and is not a symlink, refusing to delete it."
+  exit 1
+fi
+
 # Symlink to the files directory
 cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
 rm -f files
