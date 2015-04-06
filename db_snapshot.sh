@@ -9,7 +9,7 @@ usage() {
   echo "usage: $0 [-d @drush_alias]"
   echo "    -d          Specify drush alias (include leading @)"
   echo ""
-  echo "Both arguments are required."
+  echo "-d argument is required."
   exit 1
 }
 
