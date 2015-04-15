@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Run a 'drush cc all' for a specified site.
 # This is a simple wrapper script that can be added to sudo config

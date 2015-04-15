@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Update the webroot symlink to point at a new release tag.
 # Use with care, this updates the LIVE website symlink.

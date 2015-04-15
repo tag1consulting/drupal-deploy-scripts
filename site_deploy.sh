@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # site_deploy.sh:
 # Clone a site's git repo if it doesn't already exist locally.
 # Creates a 'releases' directory, and does the following within the git clone:
@@ -111,11 +111,11 @@ then
   echo "Found .git directory, looks like a clone already exists."
   cd $GIT_DIR
   echo "Running git fetch --all"
-  /usr/bin/git fetch --all || { echo "Error with git fetch --all command."; exit 1; }
+  git fetch --all || { echo "Error with git fetch --all command."; exit 1; }
   echo "Running git fetch --tags"
-  /usr/bin/git fetch --tags || { echo "Error with git fetch --tags command."; exit 1; }
+  git fetch --tags || { echo "Error with git fetch --tags command."; exit 1; }
   echo "Updating current clone with git pull"
-  /usr/bin/git pull || { echo "Error with git pull command."; exit 1; }
+  git pull || { echo "Error with git pull command."; exit 1; }
 else
   echo "Git directory doesn't exist, cloning from remote."
   cd ${GIT_DIR}
@@ -163,10 +163,10 @@ echo "Checking that target tag exists..."
 # ideally would use --short flag for this, but not supported in our version of git
 # so using cut instead.
 CUR_BRANCH=$(/usr/bin/git symbolic-ref -q HEAD | cut -d / -f 3)
-/usr/bin/git checkout $GIT_TAG 2>/dev/null
+git checkout $GIT_TAG 2>/dev/null
 ret=$?
 # Switch back to the old branch (usually master)
-/usr/bin/git checkout ${CUR_BRANCH} 2>/dev/null
+git checkout ${CUR_BRANCH} 2>/dev/null
 
 if [ $ret != 0 ]
 then
@@ -189,4 +189,4 @@ touch $TARGET_DIR
 cd $TARGET_DIR
 
 echo "Running git checkout $GIT_TAG"
-/usr/bin/git checkout $GIT_TAG 2>/dev/null || { echo "Error with git checkout command."; exit 1; }
+git checkout $GIT_TAG 2>/dev/null || { echo "Error with git checkout command."; exit 1; }
