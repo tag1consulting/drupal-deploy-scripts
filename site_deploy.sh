@@ -162,7 +162,7 @@ fi
 echo "Checking that target tag exists..."
 # ideally would use --short flag for this, but not supported in our version of git
 # so using cut instead.
-CUR_BRANCH=$(/usr/bin/git symbolic-ref -q HEAD | cut -d / -f 3)
+CUR_BRANCH=$(git symbolic-ref -q HEAD | cut -d / -f 3)
 git checkout $GIT_TAG 2>/dev/null
 ret=$?
 # Switch back to the old branch (usually master)
