@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Enable or disable maintenance mode on a given site.
 # This is a simple wrapper script that can be added to sudo config

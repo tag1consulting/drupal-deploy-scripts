@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Take a snapshot of a Drupal database for a given Drush alias.
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # site_deploy.sh:
 # Clone a site's git repo if it doesn't already exist locally.
 # Creates a 'releases' directory, and does the following within the git clone:
