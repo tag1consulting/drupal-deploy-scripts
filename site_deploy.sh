@@ -77,7 +77,7 @@ DRUPAL_SITE_DIR=$($DRUSH_CMD $DRUSH_ALIAS sitedir 2>/dev/null)
 
 if [ -z "${DRUPAL_SITE_DIR}" ]
 then
-  DRUPAL_SITE_DIR=docroot/sites/default
+  DRUPAL_SITE_DIR=${DOCROOT_DIR_NAME}/sites/default
 fi
 
 HOSTNAME=$(uname -n)
@@ -146,7 +146,7 @@ ln -s ${FILES_DIR} files
 echo "Creating symlink for settings.local.php."
 cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
 rm -f settings.local.php
-ln -s instances/${ENVIRONMENT}/settings.local.php settings.local.php
+ln -s ${INSTANCE_DIR_NAME}/${ENVIRONMENT}/settings.local.php settings.local.php
 
 LINK_SERVICES_YML=$($DRUSH_CMD $DRUSH_ALIAS link-services-yml 2>/dev/null)
 if [ "${LINK_SERVICES_YML}" == "true" ]
@@ -154,7 +154,7 @@ then
   echo "Creating symlink for services.yml"
   cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
   rm -f services.yml
-  ln -s instances/${ENVIRONMENT}/services.yml services.yml
+  ln -s ${INSTANCE_DIR_NAME}/${ENVIRONMENT}/services.yml services.yml
 fi
 
 # Now, do the actual deploy of a git tag (or branch)

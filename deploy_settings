@@ -14,6 +14,11 @@ DOCROOT_DIR_NAME=docroot
 # (deployments of a particular git tag) for production.
 RELEASE_DIR_NAME=releases
 
+# INSTANCES_DIR_NAME is the directory which holds local instance settings.
+# Can be relative within sites/default/ or a full path if instance settings
+# are kept outside of the code repo.
+INSTANCE_DIR_NAME=instances
+
 # Files directory lives outside of the git clone
 # so that we can symlink to the same files directory
 # when deploying a new release.
