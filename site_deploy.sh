@@ -80,11 +80,18 @@ then
   DRUPAL_SITE_DIR=${DOCROOT_DIR_NAME}/sites/default
 fi
 
+# Get path to files dir if set, otherwise set to default of ${BASEDIR}/files
+FILES_DIR=$($DRUSH_CMD $DRUSH_ALIAS real-files-path 2>/dev/null)
+
+if [ -z "${FILES_DIR}" ]
+then
+  FILES_DIR=${BASEDIR}/files
+fi
+
 HOSTNAME=$(uname -n)
 
 GIT_DIR=${BASEDIR}/${GIT_DIR_NAME}
 RELEASE_DIR=${BASEDIR}/${RELEASE_DIR_NAME}
-FILES_DIR=${BASEDIR}/${FILES_DIR_NAME}
 
 echo "Going to deploy $GIT_TAG on $HOSTNAME"
 
