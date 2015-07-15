@@ -46,7 +46,9 @@ then
 fi
 
 DATE=$(date +"%Y%m%d%H%M")
-OUTFILE=${DB_SNAPSHOT_DIR}/${DRUSH_ALIAS}-${DATE}.sql.gz
+# Strip leading '@' from drush alias for output filename.
+SITE_NAME=${DRUSH_ALIAS:1}
+OUTFILE=${DB_SNAPSHOT_DIR}/${SITE_NAME}-${DATE}.sql.gz
 
 $DRUSH_CMD $DRUSH_ALIAS sql-dump --gzip > ${OUTFILE}
 ls -lh ${OUTFILE}
