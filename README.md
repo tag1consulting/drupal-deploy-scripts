@@ -3,7 +3,7 @@ These scripts are used to deploy Drupal sites. They expect the site code is in a
 
 The scripts rely on a number of variables being stored in the "shell-aliases" array within a drush alias defined for the site you want to deploy to. ```example.aliases.drushrc.php``` gives an example of the expected settings. By "hacking" these into a Drush alias, we are able to keep all the deployment settings in the same place as the site's Drush definition instead of maintaining separate settings only for deployments.
 
-The ```deploy_settings``` file contains some default settings (mostly directory names at this point) used by the deployment scripts. Generally you shouldn't have to edit this file.
+The ```deploy_settings``` file contains some default settings (mostly directory names at this point) used by the deployment scripts. Generally you shouldn't have to edit this file but if you have settings shared across your sites/environments, it may make sense to store those here.
 
 ## Scripts
 * ```adjust_live_symlink.sh``` is used to update a site's symlink to point to a given release directory. This is generally called after deploying a tag in order to adjust the ```current``` symlink to point to the newly-deployed version of the site.
