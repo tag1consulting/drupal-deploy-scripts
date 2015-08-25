@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script will clean up old release directories.
 # Usage: ./clean_old_deploys.sh -d <@drush_alias> -s <save_releases>
