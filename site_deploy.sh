@@ -197,3 +197,10 @@ cd $TARGET_DIR
 
 echo "Running git checkout $GIT_TAG"
 git checkout $GIT_TAG 2>/dev/null || { echo "Error with git checkout command."; exit 1; }
+
+# If this is a git branch that already existed, we need to run git pull
+# to be sure we have the latest code from that branch.
+if [ $FORCE == 1 ]
+then
+  git pull 2>/dev/null
+fi
