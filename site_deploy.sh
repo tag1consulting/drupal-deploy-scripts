@@ -189,7 +189,7 @@ then
 fi
 
 # Copy base git clone to target directory
-cp -a $GIT_DIR $TARGET_DIR
+cp -dr --preserve=mode,ownership,context,links,xattr $GIT_DIR $TARGET_DIR
 
 # Touch target dir so it has a valid timestamp for the deployment.
 touch $TARGET_DIR
