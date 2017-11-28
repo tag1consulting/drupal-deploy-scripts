@@ -73,8 +73,8 @@ then
 fi
 
 # Get site dir (e.g. "sites/some.host.com") if set, otherwise set to default of "sites/default".
-DRUPAL_SITE_DIR="$($DRUSH_CMD $DRUSH_ALIAS sitedir 2>/dev/null)"
-
+#DRUPAL_SITE_DIR="$($DRUSH_CMD $DRUSH_ALIAS sitedir 2>/dev/null)" // this doesn't exist
+DRUPAL_SITE_DIR=""
 if [ -z "${DRUPAL_SITE_DIR}" ]
 then
   DRUPAL_SITE_DIR="${DOCROOT_DIR_NAME}/sites/default"
