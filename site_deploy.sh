@@ -51,7 +51,7 @@ else
   exit 1
 fi
 
-BASEDIR=$($DRUSH_CMD $DRUSH_ALIAS basedir 2>/dev/null)
+BASEDIR=$($DRUSH_CMD $DRUSH_ALIAS basedir | tail -1 2>/dev/null)
 if [ -z "${BASEDIR}" ] || [ ! -d $BASEDIR ]
 then
   echo "Base directory (${BASEDIR}) doesn't exist. Ensure ['shell-aliases']['basedir'] is set for this drush alias."
@@ -202,5 +202,5 @@ git checkout $GIT_TAG 2>/dev/null || { echo "Error with git checkout command."; 
 # to be sure we have the latest code from that branch.
 if [ $FORCE == 1 ]
 then
-  git pull 2>/dev/null
+  git pull 2>/dev/null || echo "Error with final forced git pull, this may be normal if you deployed a tag instead of a branch."
 fi
