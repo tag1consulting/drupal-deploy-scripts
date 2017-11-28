@@ -43,80 +43,80 @@ then
   usage
 fi
 
-if [ -f  $DEPLOY_SETTINGS ]
+if [ -f "$DEPLOY_SETTINGS" ]
 then
-  . $DEPLOY_SETTINGS
+  . "$DEPLOY_SETTINGS"
 else
   echo "Deploy settings file (${DEPLOY_SETTINGS}) is missing."
   exit 1
 fi
 
-BASEDIR=$($DRUSH_CMD $DRUSH_ALIAS basedir | tail -1 2>/dev/null)
-if [ -z "${BASEDIR}" ] || [ ! -d $BASEDIR ]
+BASEDIR="$($DRUSH_CMD $DRUSH_ALIAS basedir | tail -1 2>/dev/null)"
+if [ -z "${BASEDIR}" ] || [ ! -d "$BASEDIR" ]
 then
   echo "Base directory (${BASEDIR}) doesn't exist. Ensure ['shell-aliases']['basedir'] is set for this drush alias."
   exit 1
 fi
 
-GIT_REPO_URL=$($DRUSH_CMD $DRUSH_ALIAS giturl 2>/dev/null)
+GIT_REPO_URL="$($DRUSH_CMD $DRUSH_ALIAS giturl 2>/dev/null)"
 if [ -z "${GIT_REPO_URL}" ]
 then
   echo "Git repo URL is empty. Ensure ['shell-aliases']['giturl'] is set for this drush alias."
   exit 1
 fi
 
-ENVIRONMENT=$($DRUSH_CMD $DRUSH_ALIAS site-environment 2>/dev/null)
+ENVIRONMENT="$($DRUSH_CMD $DRUSH_ALIAS site-environment 2>/dev/null)"
 if [ -z "${ENVIRONMENT}" ]
 then
-  echo "Site environment is empty. Ensure ['shell-aliases']['site-environment'] is set for this drush alias. (e.g. "dev" or "prod")."
+  echo "Site environment is empty. Ensure ['shell-aliases']['site-environment'] is set for this drush alias. (e.g. \"dev\" or \"prod\")."
   exit 1
 fi
 
 # Get site dir (e.g. "sites/some.host.com") if set, otherwise set to default of "sites/default".
-DRUPAL_SITE_DIR=$($DRUSH_CMD $DRUSH_ALIAS sitedir 2>/dev/null)
+DRUPAL_SITE_DIR="$($DRUSH_CMD $DRUSH_ALIAS sitedir 2>/dev/null)"
 
 if [ -z "${DRUPAL_SITE_DIR}" ]
 then
-  DRUPAL_SITE_DIR=${DOCROOT_DIR_NAME}/sites/default
+  DRUPAL_SITE_DIR="${DOCROOT_DIR_NAME}/sites/default"
 fi
 
 # Get path to files dir if set, otherwise set to default of ${BASEDIR}/files
-FILES_DIR=$($DRUSH_CMD $DRUSH_ALIAS real-files-path 2>/dev/null)
+FILES_DIR="$($DRUSH_CMD $DRUSH_ALIAS real-files-path 2>/dev/null)"
 
 if [ -z "${FILES_DIR}" ]
 then
-  FILES_DIR=${BASEDIR}/files
+  FILES_DIR="${BASEDIR}/files"
 fi
 
-HOSTNAME=$(uname -n)
+HOSTNAME="$(uname -n)"
 
-GIT_DIR=${BASEDIR}/${GIT_DIR_NAME}
-RELEASE_DIR=${BASEDIR}/${RELEASE_DIR_NAME}
+GIT_DIR="${BASEDIR}/${GIT_DIR_NAME}"
+RELEASE_DIR="${BASEDIR}/${RELEASE_DIR_NAME}"
 
 echo "Going to deploy $GIT_TAG on $HOSTNAME"
 
-TARGET_DIR=${RELEASE_DIR}/${GIT_TAG}
+TARGET_DIR="${RELEASE_DIR}/${GIT_TAG}"
 
 # In most cases we don't want to overwrite a release dir if it already exists.
 # But on Dev sites where we may deploy a branch name (e.g. "dev"), we may want to replace an old release dir.
 # Only do so if the force (-f) flag was passed.
-if [ -d $TARGET_DIR ] && [ $FORCE != 1 ]
+if [ -d "$TARGET_DIR" ] && [ $FORCE != 1 ]
 then
   echo "Target release directory (${TARGET_DIR}) already exists, won't overwrite without -f flag."
   exit 1
 fi
 
 # Create git directory if it doesn't exist.
-if [ ! -d ${GIT_DIR} ]
+if [ ! -d "${GIT_DIR}" ]
 then
-  mkdir ${GIT_DIR}
+  mkdir "${GIT_DIR}"
 fi
 
 # Run git fetch in git directory if a clone already exits, otherwise clone from remote git URL.
-if [ -d ${GIT_DIR}/.git ]
+if [ -d "${GIT_DIR}/.git" ]
 then
   echo "Found .git directory, looks like a clone already exists."
-  cd $GIT_DIR
+  cd "$GIT_DIR"
   echo "Running git fetch --all"
   git fetch --all || { echo "Error with git fetch --all command."; exit 1; }
   echo "Running git fetch --tags"
@@ -125,43 +125,43 @@ then
   git pull || { echo "Error with git pull command."; exit 1; }
 else
   echo "Git directory doesn't exist, cloning from remote."
-  cd ${GIT_DIR}
-  git clone ${GIT_REPO_URL} . || { echo "Error with git clone command."; exit 1; }
+  cd "${GIT_DIR}"
+  git clone "${GIT_REPO_URL}" . || { echo "Error with git clone command."; exit 1; }
 fi
 
 # Create the releases directory if it doesn't already exist
-if [ ! -d ${RELEASE_DIR} ]
+if [ ! -d "${RELEASE_DIR}" ]
 then
-  mkdir ${RELEASE_DIR}
+  mkdir "${RELEASE_DIR}"
 fi
 
 # All symlinks are removed and re-created with each deploy
 # To be sure all links match the current environment.
 
 # We assume 'files' is a symlink, error out if not to prevent erasing site files.
-if [ -f ${GIT_DIR}/${DRUPAL_SITE_DIR}/files ] && [ ! -L ${GIT_DIR}/${DRUPAL_SITE_DIR}/files ]
+if [ -f "${GIT_DIR}/${DRUPAL_SITE_DIR}/files" ] && [ ! -L "${GIT_DIR}/${DRUPAL_SITE_DIR}/files" ]
 then
   echo "${GIT_DIR}/${DRUPAL_SITE_DIR}/files exists and is not a symlink, refusing to delete it."
   exit 1
 fi
 
 # Symlink to the files directory
-cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
+cd "${GIT_DIR}/${DRUPAL_SITE_DIR}"
 rm -f files
-ln -s ${FILES_DIR} files
+ln -s "${FILES_DIR}" files
 
 echo "Creating symlink for settings.local.php."
-cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
+cd "${GIT_DIR}/${DRUPAL_SITE_DIR}"
 rm -f settings.local.php
-ln -s ${INSTANCE_DIR_NAME}/${ENVIRONMENT}/settings.local.php settings.local.php
+ln -s "${INSTANCE_DIR_NAME}/${ENVIRONMENT}/settings.local.php" settings.local.php
 
-LINK_SERVICES_YML=$($DRUSH_CMD $DRUSH_ALIAS link-services-yml 2>/dev/null)
+LINK_SERVICES_YML="$($DRUSH_CMD $DRUSH_ALIAS link-services-yml 2>/dev/null)"
 if [ "${LINK_SERVICES_YML}" == "true" ]
 then
   echo "Creating symlink for services.yml"
-  cd ${GIT_DIR}/${DRUPAL_SITE_DIR}
+  cd "${GIT_DIR}/${DRUPAL_SITE_DIR}"
   rm -f services.yml
-  ln -s ${INSTANCE_DIR_NAME}/${ENVIRONMENT}/services.yml services.yml
+  ln -s "${INSTANCE_DIR_NAME}/${ENVIRONMENT}/services.yml" services.yml
 fi
 
 # Now, do the actual deploy of a git tag (or branch)
@@ -169,11 +169,11 @@ fi
 echo "Checking that target tag exists..."
 # ideally would use --short flag for this, but not supported in our version of git
 # so using cut instead.
-CUR_BRANCH=$(git symbolic-ref -q HEAD | cut -d / -f 3)
-git checkout $GIT_TAG 2>/dev/null
+CUR_BRANCH="$(git symbolic-ref -q HEAD | cut -d / -f 3)"
+git checkout "$GIT_TAG" 2>/dev/null
 ret=$?
 # Switch back to the old branch (usually master)
-git checkout ${CUR_BRANCH} 2>/dev/null
+git checkout "${CUR_BRANCH}" 2>/dev/null
 
 if [ $ret != 0 ]
 then
@@ -182,21 +182,21 @@ then
 fi
 
 # Remove target directory if it exists and -f was specified.
-if [ -d $TARGET_DIR ] && [ $FORCE == 1 ]
+if [ -d "$TARGET_DIR" ] && [ $FORCE == 1 ]
 then
   echo "Target release directory exists, but -f was specified. Removing old directory..."
-  rm -fr $TARGET_DIR
+  rm -fr "$TARGET_DIR"
 fi
 
 # Copy base git clone to target directory
-cp $COPY_FLAGS $GIT_DIR $TARGET_DIR
+cp $COPY_FLAGS "$GIT_DIR" "$TARGET_DIR"
 
 # Touch target dir so it has a valid timestamp for the deployment.
-touch $TARGET_DIR
-cd $TARGET_DIR
+touch "$TARGET_DIR"
+cd "$TARGET_DIR"
 
 echo "Running git checkout $GIT_TAG"
-git checkout $GIT_TAG 2>/dev/null || { echo "Error with git checkout command."; exit 1; }
+git checkout "$GIT_TAG" 2>/dev/null || { echo "Error with git checkout command."; exit 1; }
 
 # If this is a git branch that already existed, we need to run git pull
 # to be sure we have the latest code from that branch.
