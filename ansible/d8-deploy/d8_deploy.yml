@@ -1,5 +1,10 @@
 - hosts: webservers
   any_errors_fatal: true
+  vars:
+    deploy_user: deploy
+    ## Required vars that should be passed using `--extra-vars` when calling ansible-playbook:
+    #git_deploy_repo: git@github.com:tag1consulting/tag1consulting.com.git
+    #git_tag: dev
   become: "{{ deploy_user }}"
   tasks:
     - name: "Ensure releases directory exists"
@@ -11,13 +16,9 @@
         state: directory
       become: root
 
-    - name: "Pre-clone tasks"
-      include_tasks: pre-clone.yml
-      when: do_pre_clone
-
     - name: "Clone branch/tag"
       git:
-        repo: "{{ git_repo }}"
+        repo: "{{ git_deploy_repo }}"
         dest: "/var/www/{{ site }}/releases/{{ git_tag }}"
         version: "{{ git_tag }}"
 
@@ -77,7 +78,3 @@
         dest: /var/www/{{ site }}/current
         state: link
         force: true
-
-    - name: "Post-live tasks"
-      include_tasks: post-live.yml
-      when: do_post_live

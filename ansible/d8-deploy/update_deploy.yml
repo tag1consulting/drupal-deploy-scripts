@@ -1,8 +1,14 @@
 - hosts: localhost
   any_errors_fatal: true
   vars:
-    git_clone_dir: ~/{{ site }}-clone-git
-    git_deploy_dir: ~/{{ site }}-deploy-git
+    site: quo.tag1consulting.com
+    git_clone_dir: /tmp/{{ site }}-clone-git
+    git_deploy_dir: /tmp/{{ site }}-deploy-git
+    do_composer_install: true
+    ## Required vars that should be passed using `--extra-vars` when calling ansible-playbook:
+    #git_repo: git@github.com:tag1consulting/quo.tag1consulting.com.git
+    #deploy_repo: git@github.com:tag1consulting/quo.tag1consulting.com-deploy.git
+    #git_tag: dev
 
   tasks:
     - name: Clear out existing git clone and work directories
@@ -55,11 +61,12 @@
 
     - name: Sync updated code to deploy directory
       synchronize:
-        src: "{{ git_clone_dir }}"
+        src: "{{ git_clone_dir }}/"
         dest: "{{ git_deploy_dir }}"
-      rsync_opts:
-        - "--exclude=.git"
-        - "--delete"
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=.gitignore"
+          - "--delete"
 
     - name: Run composer
       command: composer install
