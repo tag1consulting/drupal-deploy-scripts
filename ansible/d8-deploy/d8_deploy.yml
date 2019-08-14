@@ -3,6 +3,7 @@
   vars:
     deploy_user: deploy
     ## Required vars that should be passed using `--extra-vars` when calling ansible-playbook:
+    #site: tag1consulting.com
     #git_deploy_repo: git@github.com:tag1consulting/tag1consulting.com.git
     #git_tag: dev
   become: "{{ deploy_user }}"
