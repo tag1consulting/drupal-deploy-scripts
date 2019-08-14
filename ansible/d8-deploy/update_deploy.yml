@@ -1,11 +1,11 @@
 - hosts: localhost
   any_errors_fatal: true
   vars:
-    site: quo.tag1consulting.com
     git_clone_dir: /tmp/{{ site }}-clone-git
     git_deploy_dir: /tmp/{{ site }}-deploy-git
     do_composer_install: true
     ## Required vars that should be passed using `--extra-vars` when calling ansible-playbook:
+    #site: quo.tag1consulting.com
     #git_repo: git@github.com:tag1consulting/quo.tag1consulting.com.git
     #deploy_repo: git@github.com:tag1consulting/quo.tag1consulting.com-deploy.git
     #git_tag: dev
