@@ -1,0 +1,82 @@
+- hosts: webservers
+  any_errors_fatal: true
+  become: "{{ deploy_user }}"
+  tasks:
+    - name: "Ensure releases directory exists"
+      file:
+        path: "/var/www/{{ site }}/releases"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: 0755
+        state: directory
+
+    - name: "Pre-clone tasks"
+      include_tasks: pre-clone.yml
+      when: do_pre_clone
+
+    - name: "Clone branch/tag"
+      git:
+        repo: "{{ git_repo }}"
+        dest: "/var/www/{{ site }}/releases/{{ git_tag }}"
+        version: "{{ git_tag }}"
+
+    - name: "Check for .env"
+      stat:
+        path: /var/www/{{ site }}/settings/environment
+      register: use_env
+
+    - name: "Check for settings.local.php"
+      stat:
+        path: /var/www/{{ site }}/settings/settings.local.php
+      register: use_settings_local
+
+    - name: "Check for services.yml"
+      stat:
+        path: /var/www/{{ site }}/settings/services.yml
+      register: use_services_yml
+
+    - name: "Symlinking environment settings file"
+      file:
+        src: /var/www/{{ site }}/settings/environment
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/.env
+        state: link
+      when: use_env
+
+    - name: "Symlinking settings.local.php"
+      file:
+        src: /var/www/{{ site }}/settings/settings.local.php
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/sites/default/settings.local.php
+        state: link
+      when: use_settings_local
+
+    - name: "Symlink services.yml"
+      file:
+        src: /var/www/{{ site }}/settings/services.yml
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/sites/default/services.yml
+        state: link
+      when: use_services_yml
+
+    - name: "Set up persistent storage"
+      file:
+        path: "{{ drupal_files_source }}"
+        owner: www-data
+        group: www-data
+        state: directory
+        recurse: true
+
+    - name: "Symlink persistent storage"
+      file:
+        src: "{{ drupal_files_source }}"
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/sites/default/files
+        state: link
+
+    - name: "Making {{ git_tag }} live"
+      file:
+        src: /var/www/{{ site }}/releases/{{ git_tag }}
+        dest: /var/www/{{ site }}/current
+        state: link
+        force: true
+
+    - name: "Post-live tasks"
+      include_tasks: post-live.yml
+      when: do_post_live
