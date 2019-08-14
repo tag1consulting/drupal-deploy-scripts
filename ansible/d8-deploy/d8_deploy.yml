@@ -3,10 +3,12 @@
   vars:
     deploy_user: deploy
     ## Required vars that should be passed using `--extra-vars` when calling ansible-playbook:
-    #site: tag1consulting.com
+    #site: dev.tag1consulting.com
     #git_deploy_repo: git@github.com:tag1consulting/tag1consulting.com.git
     #git_tag: dev
-  become: "{{ deploy_user }}"
+    #drupal_files_source: /var/www/dev.tag1consulting.com/files
+  become_user: "{{ deploy_user }}"
+  become: true
   tasks:
     - name: "Ensure releases directory exists"
       file:
@@ -15,7 +17,7 @@
         group: "{{ deploy_user }}"
         mode: 0755
         state: directory
-      become: root
+      become_user: root
 
     - name: "Clone branch/tag"
       git:
@@ -41,23 +43,23 @@
     - name: "Symlinking environment settings file"
       file:
         src: /var/www/{{ site }}/settings/environment
-        dest: /var/www/{{ site }}/releases/{{ git_tag }}/.env
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/docroot/.env
         state: link
-      when: use_env
+      when: use_env.stat.exists
 
     - name: "Symlinking settings.local.php"
       file:
         src: /var/www/{{ site }}/settings/settings.local.php
-        dest: /var/www/{{ site }}/releases/{{ git_tag }}/sites/default/settings.local.php
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/docroot/sites/default/settings.local.php
         state: link
-      when: use_settings_local
+      when: use_settings_local.stat.exists
 
     - name: "Symlink services.yml"
       file:
         src: /var/www/{{ site }}/settings/services.yml
-        dest: /var/www/{{ site }}/releases/{{ git_tag }}/sites/default/services.yml
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/docroot/sites/default/services.yml
         state: link
-      when: use_services_yml
+      when: use_services_yml.stat.exists
 
     - name: "Set up persistent storage"
       file:
@@ -66,16 +68,17 @@
         group: www-data
         state: directory
         recurse: true
+      become_user: root
 
     - name: "Symlink persistent storage"
       file:
         src: "{{ drupal_files_source }}"
-        dest: /var/www/{{ site }}/releases/{{ git_tag }}/sites/default/files
+        dest: /var/www/{{ site }}/releases/{{ git_tag }}/docroot/sites/default/files
         state: link
 
     - name: "Making {{ git_tag }} live"
       file:
-        src: /var/www/{{ site }}/releases/{{ git_tag }}
+        src: /var/www/{{ site }}/releases/{{ git_tag }}/docroot
         dest: /var/www/{{ site }}/current
         state: link
         force: true
