@@ -9,6 +9,7 @@
         group: "{{ deploy_user }}"
         mode: 0755
         state: directory
+      become: root
 
     - name: "Pre-clone tasks"
       include_tasks: pre-clone.yml
