@@ -1,0 +1,98 @@
+- hosts: localhost
+  any_errors_fatal: true
+  vars:
+    git_clone_dir: /tmp/{{ site }}-clone-git
+    git_deploy_dir: /tmp/{{ site }}-deploy-git
+    do_composer_install: true
+    ## Required vars that should be passed using `--extra-vars` when calling ansible-playbook:
+    #site: quo.tag1consulting.com
+    #git_repo: git@github.com:tag1consulting/quo.tag1consulting.com.git
+    #deploy_repo: git@github.com:tag1consulting/quo.tag1consulting.com-deploy.git
+    #git_tag: dev
+
+  tasks:
+    - name: Clear out existing git clone and work directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ git_clone_dir }}"
+        - "{{ git_deploy_dir }}"
+
+    - name: Clone code repo
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ git_clone_dir }}"
+        version: "{{ git_tag }}"
+
+    - name: Clone deploy repo
+      git:
+        repo: "{{ deploy_repo }}"
+        dest: "{{ git_deploy_dir }}"
+        version: master
+
+    # Check if target branch exists. Returns 0 if exists, 2 if does not exist.
+    - name: Check if target branch exists in deploy repo
+      command: git ls-remote --heads --exit-code {{ deploy_repo }} {{ git_tag }}
+      args:
+        chdir: "{{ git_deploy_dir }}"
+      register: branchcheck
+      ignore_errors: yes
+      tags:
+        - skip_ansible_lint
+
+    # Checkout target branch if it already exists.
+    - name: Checkout target branch
+      command: git checkout {{ git_tag }}
+      args:
+        chdir: "{{ git_deploy_dir }}"
+      when: branchcheck.rc == 0
+      tags:
+        - skip_ansible_lint
+
+    # Create target branch if it doesn't already exist.
+    - name: Create target branch
+      command: git checkout -b {{ git_tag }}
+      args:
+        chdir: "{{ git_deploy_dir }}"
+      when: branchcheck.rc == 2
+      tags:
+        - skip_ansible_lint
+
+    - name: Sync updated code to deploy directory
+      synchronize:
+        src: "{{ git_clone_dir }}/"
+        dest: "{{ git_deploy_dir }}"
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=.gitignore"
+          - "--delete"
+
+    - name: Run composer
+      command: composer install
+      args:
+        chdir: "{{ git_deploy_dir }}"
+      when: do_composer_install
+
+    - name: Add all content changes to git
+      command: git add -A
+      args:
+        chdir: "{{ git_deploy_dir }}"
+      tags:
+        - skip_ansible_lint
+
+    # Ignore errors here since it's possible there are no changes to commit.
+    - name: Commit changes to git
+      command: git commit -m "Auto-commit of content for {{ git_tag }}"
+      args:
+        chdir: "{{ git_deploy_dir }}"
+      ignore_errors: yes
+      tags:
+        - skip_ansible_lint
+
+    - name: Push updated content to git
+      command: git push origin {{ git_tag }}
+      args:
+        chdir: "{{ git_deploy_dir }}"
+      tags:
+        - skip_ansible_lint
