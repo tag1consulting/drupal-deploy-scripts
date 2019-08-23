@@ -1,0 +1,43 @@
+# This play detects the drush installation for a given site.
+# The variable drush_bin_path is exported to the other plays.
+# This does run on all webservers, but its generally quick 
+# and reduces code duplication.
+- hosts: webservers
+  tasks:
+    - name: "Find Drush Binary"
+      stat:
+        path: /var/www/{{ site }}/current
+      register: webroot_symlink
+
+    - set_fact:
+        drush_bin_path: "{{ webroot_symlink.stat.lnk_target }}/../vendor/bin/drush"
+      when: webroot_symlink.stat.islnk
+
+    - debug:
+        msg: "This is the value of drush_bin_path: {{ drush_bin_path }}"
+
+# Dump Production Database
+# Required vars:
+#   site: name of website to dump. Needs to match webroot name in /var/www/xxx
+# Optional vars:
+#   dump_path: base directory to throw database dumps into
+- hosts: webservers-prod
+  run_once: true
+  any_errors_fatal: true
+  vars:
+    dump_path: /backup
+  tasks:
+    - name: "Ensure directory for dumps exists"
+      file:
+        path: "{{ dump_path }}/{{ site }}"
+        owner: deploy
+        group: deploy
+        recurse: yes
+        state: directory
+      when: dump_production is defined
+
+    - name: "Database dump"
+      command: "{{ drush_bin_path }} sql-dump -r /var/www/{{ site }}/current --gzip --result-file={{ dump_path }}/{{ site }}/{{ ansible_date_time.iso8601_basic_short }}.sql"
+      become: yes
+      become_user: deploy
+      when: dump_production is defined
