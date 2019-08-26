@@ -21,7 +21,7 @@
 #   site: name of website to dump. Needs to match webroot name in /var/www/xxx
 # Optional vars:
 #   dump_path: base directory to throw database dumps into
-- hosts: webservers-prod
+- hosts: webservers_prod
   run_once: true
   any_errors_fatal: true
   vars:
