@@ -26,6 +26,7 @@
   any_errors_fatal: true
   vars:
     dump_path: /backup
+    dump_production: false
   tasks:
     - name: "Ensure directory for dumps exists"
       file:
@@ -34,10 +35,43 @@
         group: deploy
         recurse: yes
         state: directory
-      when: dump_production is defined
+      when: dump_production
 
     - name: "Database dump"
       command: "{{ drush_bin_path }} sql-dump -r /var/www/{{ site }}/current --gzip --result-file={{ dump_path }}/{{ site }}/{{ ansible_date_time.iso8601_basic_short }}.sql"
       become: yes
       become_user: deploy
-      when: dump_production is defined
+      when: dump_production
+
+# Sync Database from Production Dump
+# Required vars:
+#   site: name of website to run against. Needs to match webroot name in /var/www/xxx
+#   update_database: true. This will not run be default.
+- hosts: webservers_dev
+  run_once: true
+  any_errors_fatal: true
+  become: yes
+  become_user: deploy
+  vars:
+    dump_path: /backup
+    update_database: false
+  tasks:
+    - name: "Find latest dump"
+      shell: "ls -t {{ dump_path }}/{{ site }} | head -n 1"
+      args:
+        executable: /bin/bash
+      register: ls_out
+
+    - name: "Database drop"
+      command: "{{ drush_bin_path }} sql-drop --yes -r /var/www/{{ site }}/current"
+      when: 
+        - ls_out.stdout.find(".sql") != -1
+        - update_database
+
+    - name: "Load database dump"
+      shell: "gunzip {{ dump_path }}/{{ site }}/{{ ls_out.stdout }} | {{ drush_bin_path }} sql-cli -r /var/www/{{ site }}/current"
+      args:
+        executable: /bin/bash
+      when: 
+        - ls_out.stdout.find(".sql") != -1
+        - update_database

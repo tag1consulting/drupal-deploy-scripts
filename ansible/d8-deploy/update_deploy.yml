@@ -69,7 +69,7 @@
           - "--delete"
 
     - name: Run composer
-      command: composer install
+      command: php{{ php_version }} composer install
       args:
         chdir: "{{ git_deploy_dir }}"
       when: do_composer_install
