@@ -65,13 +65,14 @@
     - name: "Database drop"
       command: "{{ drush_bin_path }} sql-drop --yes -r /var/www/{{ site }}/current"
       when: 
-        - ls_out.stdout.find(".sql") != -1
+        - ls_out.stdout.find(".sql.gz") != -1
         - update_database
 
     - name: "Load database dump"
-      shell: "gunzip {{ dump_path }}/{{ site }}/{{ ls_out.stdout }} | {{ drush_bin_path }} sql-cli -r /var/www/{{ site }}/current"
+      shell: "gunzip -c {{ dump_path }}/{{ site }}/{{ ls_out.stdout }} | {{ drush_bin_path }} sql-cli"
       args:
+        chdir: /var/www/{{ site }}/current/
         executable: /bin/bash
       when: 
-        - ls_out.stdout.find(".sql") != -1
+        - ls_out.stdout.find(".sql.gz") != -1
         - update_database
