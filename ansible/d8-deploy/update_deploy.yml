@@ -74,6 +74,17 @@
         chdir: "{{ git_deploy_dir }}"
         executable: /bin/bash
       when: do_composer_install
+      register: shell_output
+
+    - name: "Composer stdout"
+      debug:
+        msg: "{{ shell_output.stdout_lines }}"
+      when: shell_output.stdout_lines
+
+    - name: "Composer stderr"
+      debug:
+        msg: "{{ shell_output.stderr_lines }}"
+      when: shell_output.stderr_lines
 
     - name: Add all content changes to git
       command: git add -A
