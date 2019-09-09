@@ -66,10 +66,11 @@
         rsync_opts:
           - "--exclude=.git"
           - "--exclude=.gitignore"
+          - "--cvs-exclude"
           - "--delete"
 
     - name: Run composer
-      shell: "php{{ php_version }} $(which composer) install"
+      shell: "php{{ php_version }} $(which composer) install --no-dev"
       args:
         chdir: "{{ git_deploy_dir }}"
         executable: /bin/bash
@@ -85,6 +86,25 @@
       debug:
         msg: "{{ shell_output.stderr_lines }}"
       when: shell_output.stderr_lines
+
+    - name: Find git submodules
+      find:
+        paths:
+          - "{{ git_deploy_dir}}/docroot"
+          - "{{ git_deploy_dir}}/vendor"
+        file_type: any
+        hidden: true
+        patterns:
+          - ".git"
+          - ".gitignore"
+        recurse: true
+      register: files_to_delete
+
+    - name: Remove git submodules
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ files_to_delete.files }}"
 
     - name: Add all content changes to git
       command: git add -A
