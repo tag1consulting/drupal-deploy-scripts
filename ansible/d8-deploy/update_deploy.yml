@@ -70,7 +70,7 @@
           - "--delete"
 
     - name: Run composer
-      shell: "php{{ php_version }} $(which composer) install --no-dev"
+      shell: "php{{ php_version }} $(which composer) install --no-dev --optimize-autoloader --prefer-dist --no-progress --no-interaction"
       args:
         chdir: "{{ git_deploy_dir }}"
         executable: /bin/bash
