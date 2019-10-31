@@ -38,6 +38,7 @@ else
 fi
 
 DB_SNAPSHOT_DIR=$($DRUSH_CMD $DRUSH_ALIAS db-snapshot-dir 2>/dev/null)
+DB_SNAPSHOT_DIR="/data/db_snapshots"
 
 if [ -z "${DB_SNAPSHOT_DIR}" ] || [ ! -d $DB_SNAPSHOT_DIR ]
 then
