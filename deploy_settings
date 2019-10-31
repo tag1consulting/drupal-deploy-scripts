@@ -24,10 +24,10 @@ INSTANCE_DIR_NAME=instances
 WEBROOT_SYMLINK_NAME=current
 
 # DRUSH_CMD is your local path to the drush binary.
-DRUSH_CMD=/bin/drush
+DRUSH_CMD=/usr/local/bin/drush
 
 # COPY_FLAGS defines flags passed to 'cp' when deploying a release directory.
 # Generally you don't want to preserve timestamps.
 # Default is for Linux. BSD wants:
-# COPY_FLAGS="-R"
-COPY_FLAGS="-dr --preserve=mode,ownership,links,xattr"
+COPY_FLAGS="-R"
+#COPY_FLAGS="-dr --preserve=mode,ownership,links,xattr"
