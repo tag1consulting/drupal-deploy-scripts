@@ -53,6 +53,8 @@
   become: yes
   become_user: deploy
   vars:
+    drush_sanitize: true
+    drush_sanitize_password: "{{ lookup('password', '/dev/null length=64') }}"
     dump_path: /backup
     update_database: false
   tasks:
@@ -61,6 +63,7 @@
       args:
         executable: /bin/bash
       register: ls_out
+      when: update_database
 
     - name: "Database drop"
       command: "{{ drush_bin_path }} sql-drop --yes -r /var/www/{{ site }}/current"
@@ -73,6 +76,19 @@
       args:
         chdir: /var/www/{{ site }}/current/
         executable: /bin/bash
+      register: db_import
       when: 
         - ls_out.stdout.find(".sql.gz") != -1
         - update_database
+
+    - name: "Clean up passwords and email addresses"
+      shell: >
+        {{ drush_bin_path }} sql-sanitize --yes -r /var/www/{{ site }}/current 
+        --sanitize-password={{ drush_sanitize_password }}
+        {{ '--sanitize-email=' + drush_sanitize_email_pattern if drush_sanitize_email_pattern is defined else '' }}
+      args:
+        executable: /bin/bash
+        when: 
+          - update_database
+          - db_import.rc == 0
+          - drush_sanitize
